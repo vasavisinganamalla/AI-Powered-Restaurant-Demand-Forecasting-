@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Prediction Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+  <div class="dashboard">
+
+    <!-- ✅ Left Panel -->
+    <div class="panel">
+
+      <h2>Prediction Result</h2>
+
+      <!-- Demand Output -->
+      <p class="output">{{ demand }} Orders</p>
+
+      <!-- Status -->
+      <p class="status"><b>Status:</b> {{ level }}</p>
+
+      <!-- Recommendation -->
+      <p class="tip">{{ tip }}</p>
+
+      <!-- ✅ Auto Price Display -->
+      <p class="price"><b>Auto Price:</b> ₹{{ price }}</p>
+
+      <!-- ✅ Menu Item Preview Card -->
+      <div class="menu-card">
+
+        <h3>Selected Menu Item</h3>
+        <p style="opacity:0.85;">{{ item }}</p>
+
+        <img 
+          src="/static/menu_images/{{ food_image }}" 
+          alt="Food Preview"
+        >
+
+      </div>
+
+    </div>
+
+    <!-- ✅ Right Panel -->
+    <div class="panel">
+
+      <h2>Weekly Trend</h2>
+
+      <!-- Trend Graph -->
+      <img src="/static/{{ graph }}" class="graph">
+
+      <h3>Scenario Simulator</h3>
+
+      <!-- ✅ Simulator Form -->
+      <form action="/simulate" method="POST" class="sim-form">
+
+        <!-- Auto-Filled Price -->
+        <label>New Price</label>
+        <input 
+          type="number" 
+          name="new_price" 
+          value="{{ price }}" 
+          required
+        >
+
+        <label>Festival Day</label>
+        <select name="new_festival">
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+
+        <!-- Hidden Inputs -->
+        <input type="hidden" name="branch" value="{{ branch }}">
+        <input type="hidden" name="meal" value="{{ meal }}">
+        <input type="hidden" name="item" value="{{ item }}">
+        <input type="hidden" name="day_type" value="{{ day_type }}">
+
+        <button type="submit">Simulate Demand</button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+  <!-- ✅ Bottom Navigation Buttons -->
+  <div class="bottom-action">
+    <a href="/predict" class="btn">New Prediction</a>
+    <a href="/" class="btn">Back to Home</a>
+  </div>
+
+</body>
+</html>

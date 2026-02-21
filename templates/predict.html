@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Demand Prediction</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+  <div class="form-container">
+
+    <h2>Demand Prediction Form</h2>
+
+    <form action="/result" method="POST" class="grid-form">
+
+      <!-- ✅ Left Column -->
+      <div>
+
+        <label>Branch</label>
+        <select name="branch">
+          {% for b in branches %}
+          <option>{{ b }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Day Type</label>
+        <select name="day_type">
+          {% for d in daytypes %}
+          <option>{{ d }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Meal Time</label>
+        <select name="meal">
+          {% for m in meals %}
+          <option>{{ m }}</option>
+          {% endfor %}
+        </select>
+
+      </div>
+
+      <!-- ✅ Right Column -->
+      <div>
+
+        <!-- ✅ Menu Dropdown + Live Preview -->
+        <label>Menu Item</label>
+        <select name="item" id="menuItem" onchange="updateCard()">
+          {% for i in items %}
+          <option>{{ i }}</option>
+          {% endfor %}
+        </select>
+
+        <label>Festival Day</label>
+        <select name="festival">
+          {% for f in festivals %}
+          <option>{{ f }}</option>
+          {% endfor %}
+        </select>
+
+        
+
+      </div>
+
+      <!-- ✅ Predict Button Center -->
+      <div class="full">
+        <button type="submit">Predict Demand</button>
+      </div>
+
+    </form>
+
+    <!-- ✅ Live Preview Card BELOW Form -->
+    <div class="menu-card">
+      <img id="menuImg" src="/static/menu_images/default.jpg">
+      <h3 id="menuName">Select a Menu Item</h3>
+    </div>
+
+  </div>
+
+  <!-- ✅ Script Only Once -->
+  <script>
+    function updateCard() {
+
+      let item = document.getElementById("menuItem").value;
+      document.getElementById("menuName").innerText = item;
+
+      // ✅ Full Mapping for ALL Items
+      let imageMap = {
+        "Biscuit Pack": "biscuit.jpg",
+        "Cake Slice": "cake.jpg",
+        "Chicken Biryani": "biryani.jpg",
+        "Chicken Curry": "chickencurry.jpg",
+        "Coffee": "coffee.jpg",
+        "Dosa": "dosa.jpg",
+        "Haleem": "haleem.jpg",
+        "Idli": "idli.jpg",
+        "Meals Plate": "meals.jpg",
+        "Mutton Biryani": "mutton.jpg",
+        "Poori": "poori.jpg",
+        "Samosa": "samosa.jpg",
+        "Tea": "tea.jpg",
+        "Upma": "upma.jpg",
+        "Vada": "vada.jpg",
+        "Veg Biryani": "vegbiryani.jpg",
+        "Veg Puff": "vegpuff.jpg"
+      };
+
+      // ✅ Default fallback
+      let imgFile = imageMap[item] || "default.jpg";
+
+      document.getElementById("menuImg").src =
+        "/static/menu_images/" + imgFile;
+    }
+
+    // ✅ Load Preview Automatically on Page Start
+    window.onload = updateCard;
+  </script>
+
+</body>
+</html>

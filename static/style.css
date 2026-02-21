@@ -1,0 +1,226 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to right, #111827, #1f2937);
+  color: white;
+}
+
+/* ========================= */
+/* Landing Page */
+/* ========================= */
+
+.landing {
+  background: url("/static/images/restaurant.jpg") no-repeat center center/cover;
+  height: 100vh;
+}
+
+.overlay {
+  background: rgba(0,0,0,0.65);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-content {
+  text-align: center;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+}
+
+.hero-content p {
+  opacity: 0.85;
+  font-size: 1.2rem;
+}
+
+/* Button Styling */
+.btn {
+  display: inline-block;
+  padding: 12px 25px;
+  background: white;
+  color: black;
+  font-weight: bold;
+  border-radius: 12px;
+  text-decoration: none;
+  margin-top: 20px;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+/* ========================= */
+/* Prediction Form Page */
+/* ========================= */
+
+.form-container {
+  width: 950px;
+  margin: 60px auto;
+  background: rgba(255,255,255,0.08);
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: none;
+}
+
+/* Button */
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #38bdf8;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #0ea5e9;
+  transform: scale(1.03);
+}
+
+/* ========================= */
+/* Upgrade 3: Menu Preview Card */
+/* ========================= */
+
+.menu-card {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.10);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.menu-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 0px 25px rgba(255,255,255,0.15);
+}
+
+.menu-card img {
+  width: 220px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+}
+
+.menu-card h3 {
+  margin: 10px 0;
+}
+
+/* ========================= */
+/* Result Dashboard Page */
+/* ========================= */
+
+.dashboard {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  padding: 60px;
+  flex-wrap: wrap;
+}
+
+.panel {
+  width: 420px;
+  background: rgba(255,255,255,0.08);
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0px 0px 25px rgba(0,0,0,0.4);
+  transition: 0.3s ease;
+}
+
+.panel:hover {
+  transform: translateY(-5px);
+}
+
+/* Output Text */
+.output {
+  font-size: 2rem;
+  margin: 15px 0;
+}
+
+.tip {
+  opacity: 0.85;
+}
+
+/* Graph Responsive */
+.graph {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 15px 0;
+}
+
+/* Scenario Form Fix */
+.sim-form input,
+.sim-form select {
+  margin-bottom: 12px;
+}
+
+/* Bottom Button */
+.bottom-action {
+  text-align: center;
+  margin: 35px 0;
+}
+
+/* ========================= */
+/* Mobile Responsive Fix */
+/* ========================= */
+
+@media (max-width: 900px) {
+
+  .form-container {
+    width: 90%;
+  }
+
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard {
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+  }
+
+  .panel {
+    width: 90%;
+  }
+}
+.bottom-action {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.full {
+  grid-column: span 2;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;  
+}
