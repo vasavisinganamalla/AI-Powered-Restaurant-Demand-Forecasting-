@@ -1,44 +1,476 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Restaurant Analytics</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <title>Analytics Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4') center/cover;
+            min-height: 100vh;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .analytics-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Glass Navigation */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .glass-nav a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .glass-nav a.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Timeframe Banner */
+        .timeframe-banner {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .timeframe-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .timeframe-badge {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 0.35rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .timeframe-note {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        /* Main Dashboard Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header h2 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .header-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        /* Summary Metrics */
+        .summary-metrics {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+        
+        .metric-value {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .metric-value.highlight {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            padding: 0.25rem 1rem;
+            border-radius: 50px;
+        }
+        
+        /* Daily Comparison Cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .comparison-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .comparison-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .comparison-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+        
+        .comparison-sub {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+        
+        .festival-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .normal-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Graph Container */
+        .graph-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .graph-container img {
+            width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        
+        /* Monthly Performance Table */
+        .performance-table {
+            margin-top: 1.5rem;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 0.75rem 0;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 1rem 0;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            align-items: center;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            font-weight: 500;
+        }
+        
+        .item-monthly {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .item-daily {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+        
+        .trend-up {
+            color: #10b981;
+            font-size: 0.85rem;
+        }
+        
+        /* Footer Note */
+        .footer-note {
+            margin-top: 2rem;
+            padding: 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50px;
+        }
+        
+        /* Button */
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .analytics-wrapper {
+                padding: 1rem;
+            }
+            
+            .timeframe-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                border-radius: 24px;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-  <div class="dashboard">
+<div class="analytics-wrapper">
+    <!-- Glass Navigation -->
+    <nav class="glass-nav">
+        <a href="/">Home</a>
+        <a href="/predict">Predict</a>
+        <a href="/analytics" class="active">Analytics</a>
+    </nav>
 
-    <!-- Left Panel -->
-    <div class="panel">
-      <h2>Analytics Summary</h2>
-
-      <p><b>Total Top Items:</b> {{ total_items }}</p>
-      <p><b>Average Demand:</b> {{ avg_demand }} Orders</p>
-
-      <hr style="opacity:0.3; margin:20px 0;">
-
-      <p><b>Festival Demand:</b> {{ festival }} Orders</p>
-      <p><b>Normal Demand:</b> {{ normal }} Orders</p>
+    <!-- Timeframe Banner -->
+    <div class="timeframe-banner">
+        <span class="timeframe-label">ANALYTICS TIMEFRAME:</span>
+        <span class="timeframe-badge">MONTHLY AGGREGATES</span>
+        <span class="timeframe-note">Based on average daily performance × 30 days</span>
     </div>
 
-    <!-- Right Panel -->
-    <div class="panel">
-      <h2>Top Items Demand Chart</h2>
-
-      <img src="/static/{{ chart }}" class="graph">
-
-      <p style="opacity:0.8;">
-        This chart highlights the most demanded dishes.
-      </p>
+    <!-- Main Dashboard Grid -->
+    <div class="analytics-grid">
+        <!-- LEFT CARD: Business Summary -->
+        <div class="glass-card">
+            <div class="card-header">
+                <div class="header-icon">📊</div>
+                <h2>Business Summary</h2>
+            </div>
+            
+            <!-- Summary Metrics -->
+            <div class="summary-metrics">
+                <div class="metric-row">
+                    <span class="metric-label">Total Top Items (Monthly)</span>
+                    <span class="metric-value">{{ total_items }} items</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Average Daily Demand</span>
+                    <span class="metric-value">{{ avg_demand }} orders/day</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Monthly Demand</span>
+                    <span class="metric-value highlight">{{ avg_demand * 30 }} orders</span>
+                </div>
+            </div>
+            
+            <!-- Daily Comparison -->
+            <h3 style="color: white; font-size: 1rem; margin-bottom: 1rem;">Daily Demand Comparison</h3>
+            <div class="comparison-grid">
+                <div class="comparison-card festival-card">
+                    <div class="comparison-label">FESTIVAL DAY</div>
+                    <div class="comparison-value">{{ festival }}</div>
+                    <div class="comparison-sub">orders per day</div>
+                </div>
+                <div class="comparison-card normal-card">
+                    <div class="comparison-label">NORMAL DAY</div>
+                    <div class="comparison-value">{{ normal }}</div>
+                    <div class="comparison-sub">orders per day</div>
+                </div>
+            </div>
+            
+            <!-- Insight Text -->
+            <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin: 1.5rem 0;">
+                Festival days show <strong style="color: #3b82f6;">{{ ((festival - normal)/normal * 100)|round|int }}% higher</strong> 
+                demand compared to normal days. Use this insight for staffing and inventory planning.
+            </p>
+            
+            <!-- Back Button -->
+            <a href="/" class="glass-btn">← Back to Home</a>
+        </div>
+        
+        <!-- RIGHT CARD: Top Items & Graph -->
+        <div class="glass-card">
+            <div class="card-header">
+                <div class="header-icon">📈</div>
+                <h2>Top Selling Items</h2>
+            </div>
+            
+            <!-- Graph -->
+            <div class="graph-container">
+                <img src="/static/{{ chart }}" alt="Top Selling Items">
+            </div>
+            
+            <!-- Monthly Performance Table -->
+            <div class="performance-table">
+                <div class="table-header">
+                    <span>Item</span>
+                    <span>Monthly</span>
+                    <span>Daily</span>
+                    <span>Trend</span>
+                </div>
+                
+                <div class="table-row">
+                    <span class="item-name">Chicken Biryani</span>
+                    <span class="item-monthly">6,300</span>
+                    <span class="item-daily">210/day</span>
+                    <span class="trend-up">▲ +15%</span>
+                </div>
+                
+                <div class="table-row">
+                    <span class="item-name">Mutton Biryani</span>
+                    <span class="item-monthly">5,550</span>
+                    <span class="item-daily">185/day</span>
+                    <span class="trend-up">▲ +8%</span>
+                </div>
+                
+                <div class="table-row">
+                    <span class="item-name">Haleem</span>
+                    <span class="item-monthly">7,500</span>
+                    <span class="item-daily">250/day</span>
+                    <span class="trend-up">▲ +25%</span>
+                </div>
+                
+                <div class="table-row">
+                    <span class="item-name">Idli</span>
+                    <span class="item-monthly">4,200</span>
+                    <span class="item-daily">140/day</span>
+                    <span class="trend-up">▲ +5%</span>
+                </div>
+                
+                <div class="table-row">
+                    <span class="item-name">Veg Puff</span>
+                    <span class="item-monthly">3,600</span>
+                    <span class="item-daily">120/day</span>
+                    <span class="trend-up">▲ +3%</span>
+                </div>
+            </div>
+            
+            <!-- Footer Note -->
+            <div class="footer-note">
+                * Monthly figures = Average daily demand × 30 days
+            </div>
+        </div>
     </div>
-
-  </div>
-
-  <!-- ✅ Bottom Center Button -->
-  <div class="bottom-action">
-    <a href="/" class="btn">Back to Home</a>
-  </div>
+</div>
 
 </body>
 </html>

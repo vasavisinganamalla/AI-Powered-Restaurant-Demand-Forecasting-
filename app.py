@@ -2,10 +2,8 @@ from flask import Flask, render_template, request
 import joblib
 import pandas as pd
 import datetime
-
 import matplotlib
 matplotlib.use("Agg")
-
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -23,7 +21,7 @@ item_options = encoders["Item_Name"].classes_[:20]
 festival_options = encoders["Festival"].classes_
 daytype_options = encoders["Day_Type"].classes_
 
-# Auto Category Map
+# Category mapping
 item_category_map = {
     "Idli": "Breakfast",
     "Dosa": "Breakfast",
@@ -36,7 +34,7 @@ item_category_map = {
     "Haleem": "Festival Special"
 }
 
-# Menu Images Mapping
+# Menu images
 menu_images = {
     "Biscuit Pack": "biscuit.jpg",
     "Cake Slice": "cake.jpg",
@@ -57,42 +55,26 @@ menu_images = {
     "Veg Puff": "vegpuff.jpg"
 }
 
-# Fixed Menu Prices (Auto Pricing)
+# Pricing
 item_prices = {
-    "Idli": 50,
-    "Dosa": 80,
-    "Poori": 70,
-    "Upma": 60,
-    "Vada": 50,
-
-    "Tea": 20,
-    "Coffee": 40,
-
+    "Idli": 50, "Dosa": 80, "Poori": 70,
+    "Upma": 60, "Vada": 50,
+    "Tea": 20, "Coffee": 40,
     "Veg Biryani": 160,
     "Chicken Biryani": 220,
     "Mutton Biryani": 280,
-
     "Chicken Curry": 200,
-    "Paneer Curry": 180,
     "Meals Plate": 150,
-
-    "Samosa": 30,
-    "Veg Puff": 35,
-    "Egg Puff": 45,
-
+    "Samosa": 30, "Veg Puff": 35,
     "Cake Slice": 90,
     "Biscuit Pack": 60,
-
     "Haleem": 250
 }
 
-#  Home Page
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
-#  Prediction Form Page
 @app.route("/predict")
 def predict():
     return render_template(
@@ -104,31 +86,20 @@ def predict():
         daytypes=daytype_options
     )
 
-
-# Main Prediction Route
 @app.route("/result", methods=["POST"])
 def result():
-
     branch = request.form["branch"]
     meal = request.form["meal"]
     item = request.form["item"]
     festival = request.form["festival"]
     day_type = request.form["day_type"]
 
-    # Auto Price
     price = item_prices.get(item, 150)
-
-    # Category + Food Image
     category = item_category_map.get(item, "Main")
     selected_image = menu_images.get(item, "default.jpg")
 
-    # Date Features
     today = datetime.date.today()
-    day = today.day
-    month = today.month
-    weekday = today.weekday()
 
-    # Input DataFrame
     input_df = pd.DataFrame({
         "Branch_Name": [branch],
         "Day_Type": [day_type],
@@ -137,9 +108,9 @@ def result():
         "Category": [category],
         "Price": [price],
         "Festival": [festival],
-        "Day": [day],
-        "Month": [month],
-        "Weekday": [weekday]
+        "Day": [today.day],
+        "Month": [today.month],
+        "Weekday": [today.weekday()]
     })
 
     categorical_cols = [
@@ -150,57 +121,69 @@ def result():
     for col in categorical_cols:
         input_df[col] = encoders[col].transform(input_df[col])
 
-    #  Predict Demand
-    prediction = model.predict(input_df)[0]
+    prediction = int(model.predict(input_df)[0])
 
-    #  Demand Insight
+    revenue = prediction * price
+    cost = int(revenue * 0.6)
+    profit = revenue - cost
+    margin = round((profit / revenue) * 100, 2) if revenue != 0 else 0
+    
+    # Calculate per-unit metrics for clarity
+    cost_per_unit = int(price * 0.6)
+    profit_per_unit = int(price * 0.4)
+
     if prediction > 180:
         level = "High Demand"
-        tip = "Prepare additional stock to avoid shortages."
+        tip = "Prepare additional stock."
     elif prediction > 100:
         level = "Moderate Demand"
         tip = "Normal preparation is sufficient."
     else:
         level = "Low Demand"
-        tip = "Reduce preparation to minimize waste."
+        tip = "Reduce preparation."
 
-    # Weekly Trend Graph
     days_list = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-    demand_values = np.random.randint(int(prediction) - 30,
-                                      int(prediction) + 30, size=7)
+    demand_values = np.clip(
+        np.random.randint(prediction - 30, prediction + 30, size=7),
+        0, None
+    )
 
-    plt.figure()
-    plt.plot(days_list, demand_values, marker="o")
-    plt.title("Weekly Demand Trend")
-    plt.xlabel("Days")
-    plt.ylabel("Orders")
-
+    plt.figure(figsize=(6,4))
+    plt.plot(days_list, demand_values, marker="o", color="#3b82f6", linewidth=2)
+    plt.title(f"Weekly Demand Trend - {item}", fontsize=14, fontweight='bold')
+    plt.xlabel("Day", fontsize=10)
+    plt.ylabel("Expected Orders", fontsize=10)
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
     graph_path = os.path.join(app.root_path, "static", "trend.png")
-    plt.savefig(graph_path)
+    plt.savefig(graph_path, dpi=100, bbox_inches='tight')
     plt.close()
 
-    # Send Everything to result.html
     return render_template(
         "result.html",
-        demand=int(prediction),
+        demand=prediction,
         level=level,
         tip=tip,
-        price=price,               #Correct Fix
+        price=price,
+        revenue=revenue,
+        cost=cost,
+        profit=profit,
+        margin=margin,
         graph="trend.png",
         food_image=selected_image,
-
         branch=branch,
         meal=meal,
         item=item,
         festival=festival,
-        day_type=day_type
+        day_type=day_type,
+        cost_per_unit=cost_per_unit,
+        profit_per_unit=profit_per_unit,
+        days_list=days_list,
+        demand_values=demand_values
     )
 
-
-# Scenario Simulator Route
 @app.route("/simulate", methods=["POST"])
 def simulate():
-
     branch = request.form["branch"]
     meal = request.form["meal"]
     item = request.form["item"]
@@ -213,9 +196,6 @@ def simulate():
     selected_image = menu_images.get(item, "default.jpg")
 
     today = datetime.date.today()
-    day = today.day
-    month = today.month
-    weekday = today.weekday()
 
     input_df = pd.DataFrame({
         "Branch_Name": [branch],
@@ -225,42 +205,86 @@ def simulate():
         "Category": [category],
         "Price": [new_price],
         "Festival": [new_festival],
-        "Day": [day],
-        "Month": [month],
-        "Weekday": [weekday]
+        "Day": [today.day],
+        "Month": [today.month],
+        "Weekday": [today.weekday()]
     })
 
     categorical_cols = [
-        "Branch_Name", "Day_Type", "Meal_Time",
-        "Item_Name", "Category", "Festival"
+        "Branch_Name","Day_Type","Meal_Time",
+        "Item_Name","Category","Festival"
     ]
 
     for col in categorical_cols:
         input_df[col] = encoders[col].transform(input_df[col])
 
-    new_prediction = model.predict(input_df)[0]
+    new_prediction = int(model.predict(input_df)[0])
+    
+    # Calculate updated metrics
+    new_revenue = new_prediction * new_price
+    new_cost = int(new_revenue * 0.6)
+    new_profit = new_revenue - new_cost
+    new_margin = round((new_profit / new_revenue) * 100, 2) if new_revenue != 0 else 0
+    
+    # Per-unit metrics
+    cost_per_unit = int(new_price * 0.6)
+    profit_per_unit = int(new_price * 0.4)
+    
+    # Determine level and tip based on new prediction
+    if new_prediction > 180:
+        level = "High Demand"
+        tip = "Prepare additional stock."
+    elif new_prediction > 100:
+        level = "Moderate Demand"
+        tip = "Normal preparation is sufficient."
+    else:
+        level = "Low Demand"
+        tip = "Reduce preparation."
+    
+    # Generate weekly trend for simulated scenario
+    days_list = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    demand_values = np.clip(
+        np.random.randint(new_prediction - 30, new_prediction + 30, size=7),
+        0, None
+    )
+    
+    # Create new graph for simulated scenario
+    plt.figure(figsize=(6,4))
+    plt.plot(days_list, demand_values, marker="o", color="#8b5cf6", linewidth=2)
+    plt.title(f"Weekly Demand Trend - {item} (Simulated)", fontsize=14, fontweight='bold')
+    plt.xlabel("Day", fontsize=10)
+    plt.ylabel("Expected Orders", fontsize=10)
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    graph_path = os.path.join(app.root_path, "static", "trend.png")
+    plt.savefig(graph_path, dpi=100, bbox_inches='tight')
+    plt.close()
 
     return render_template(
         "result.html",
-        demand=int(new_prediction),
-        level="Simulated Scenario",
-        tip="Demand updated based on the new conditions.",
+        demand=new_prediction,
+        level=level,
+        tip=tip,
         price=new_price,
+        revenue=new_revenue,
+        cost=new_cost,
+        profit=new_profit,
+        margin=new_margin,
         graph="trend.png",
         food_image=selected_image,
-
         branch=branch,
         meal=meal,
         item=item,
         festival=new_festival,
-        day_type=day_type
+        day_type=day_type,
+        cost_per_unit=cost_per_unit,
+        profit_per_unit=profit_per_unit,
+        days_list=days_list,
+        demand_values=demand_values
     )
 
-
-#  Analytics Dashboard
 @app.route("/analytics")
 def analytics():
-
     top_items = {
         "Chicken Biryani": 210,
         "Mutton Biryani": 185,
@@ -271,26 +295,37 @@ def analytics():
 
     items = list(top_items.keys())
     values = list(top_items.values())
+    
+    # Calculate monthly figures
+    monthly_values = [v * 30 for v in values]
 
-    plt.figure()
-    plt.bar(items, values)
-    plt.title("Top Selling Menu Items")
-    plt.ylabel("Average Demand")
-    plt.xticks(rotation=20)
-
+    plt.figure(figsize=(8,5))
+    bars = plt.bar(items, values, color=['#3b82f6', '#8b5cf6', '#059669', '#f59e0b', '#ef4444'])
+    plt.xticks(rotation=20, fontsize=10)
+    plt.title("Top Selling Items - Average Daily Demand", fontsize=14, fontweight='bold')
+    plt.ylabel("Orders per Day", fontsize=11)
+    
+    # Add value labels on bars
+    for bar, val in zip(bars, values):
+        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 5, 
+                f'{val}', ha='center', fontsize=10, fontweight='bold')
+    
+    plt.tight_layout()
     chart_path = os.path.join(app.root_path, "static", "top_items.png")
-    plt.savefig(chart_path)
+    plt.savefig(chart_path, dpi=100, bbox_inches='tight')
     plt.close()
 
     return render_template(
         "analytics.html",
         total_items=len(items),
-        avg_demand=int(sum(values) / len(values)),
+        avg_demand=int(sum(values)/len(values)),
         festival=220,
         normal=150,
-        chart="top_items.png"
+        chart="top_items.png",
+        items=items,
+        daily_values=values,
+        monthly_values=monthly_values
     )
 
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
