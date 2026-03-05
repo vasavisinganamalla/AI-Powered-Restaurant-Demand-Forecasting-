@@ -1,34 +1,214 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Restaurant Demand Forecasting</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <title>Restaurant Revenue Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .landing-page {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4') center/cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .hero-card {
+            max-width: 700px;
+            margin: 2rem;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .hero-card h1 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero-card p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .badge-container {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        
+        .badge.blue {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+        
+        .badge.purple {
+            background: rgba(139, 92, 246, 0.4);
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+        
+        .badge.green {
+            background: rgba(5, 150, 105, 0.4);
+            border-color: rgba(5, 150, 105, 0.6);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .glass-btn-primary {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .glass-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .glass-btn-secondary {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .glass-btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .footer-note {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .footer-note span {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .hero-card h1 {
+                font-size: 2rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .glass-btn-primary, .glass-btn-secondary {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
+<body class="landing-page">
 
-<body class="landing">
-
-  <div class="overlay">
-    <div class="hero-content">
-
-      <h1>Restaurant Demand Forecasting System</h1>
-
-      <p>
-        An AI-based solution to predict daily food demand and reduce waste.
-      </p>
-
-      <!-- Buttons Section -->
-      <div class="btn-group">
-        <a href="/predict" class="btn">
-          Start Prediction
-        </a>
-
-        <a href="/analytics" class="btn">
-          View Analytics Dashboard
-        </a>
-      </div>
-
+<div class="hero-card">
+    <div class="badge-container">
+        <span class="badge blue">Daily Forecast</span>
+        <span class="badge purple">Weekly Trends</span>
+        <span class="badge green">Monthly Projections</span>
     </div>
-  </div>
+    
+    <h1>Restaurant Revenue Intelligence System</h1>
+    
+    <p>
+        AI-powered demand forecasting and profit optimization dashboard. 
+        Predict daily demand, simulate price changes, and maximize your 
+        restaurant's profitability.
+    </p>
+    
+    <div class="button-group">
+        <a href="/predict" class="glass-btn-primary">Start Prediction</a>
+        <a href="/analytics" class="glass-btn-secondary">View Analytics</a>
+    </div>
+    
+    <div class="footer-note">
+        <span>Random Forest Model</span>
+        <span>Real-time Predictions</span>
+        <span>Profit Optimization</span>
+    </div>
+</div>
 
 </body>
 </html>

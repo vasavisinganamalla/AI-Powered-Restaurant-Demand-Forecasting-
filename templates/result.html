@@ -1,94 +1,746 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>Prediction Dashboard</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <title>Demand Prediction Result</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4') center/cover;
+            min-height: 100vh;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .result-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Glass Navigation */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .glass-nav a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .glass-nav a.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* New Prediction Button */
+        .new-prediction-btn {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .new-prediction-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Time Period Banner */
+        .time-banner {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .badge-daily {
+            background: #3b82f6;
+            color: white;
+            padding: 0.35rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-weekly {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.35rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-monthly {
+            background: #059669;
+            color: white;
+            padding: 0.35rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .time-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+        
+        /* Main Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        /* Left Column - Graph + Monthly + Simulation */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-header h2 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        /* Graph Container */
+        .graph-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        
+        .graph-container img {
+            width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        
+        .graph-note {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        
+        /* Monthly Projections Card - MOVED TO LEFT COLUMN */
+        .monthly-card {
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        
+        .monthly-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .monthly-header h3 {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .monthly-badge {
+            background: #059669;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+        
+        .monthly-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .monthly-item {
+            text-align: center;
+        }
+        
+        .monthly-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #059669;
+            line-height: 1.2;
+        }
+        
+        .monthly-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .monthly-note {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        
+        /* Simulation Section - MOVED TO LEFT COLUMN */
+        .simulation-card {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        
+        .simulation-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .simulation-header h3 {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .simulation-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+        
+        .simulation-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 0.8fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            align-items: end;
+        }
+        
+        .form-field label {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95rem;
+        }
+        
+        .form-field input:focus,
+        .form-field select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+        }
+        
+        .simulation-btn {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+        
+        .simulation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .simulation-note {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Right Column - Metrics and Item Card */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .metric-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .metric-header h3 {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+        
+        .metric-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+        }
+        
+        .metric-sub {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+        }
+        
+        /* Item Card */
+        .item-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .item-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .item-header h3 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .unit-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .item-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 1rem auto;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .item-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+        
+        .detail-label {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .detail-value {
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-low {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .status-moderate {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .status-high {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Weather Note */
+        .weather-note {
+            text-align: right;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .simulation-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .monthly-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-wrapper {
+                padding: 1rem;
+            }
+            
+            .glass-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .time-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-  <div class="dashboard">
+<div class="result-wrapper">
+    <!-- Glass Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/predict">Predict</a>
+            <a href="/analytics">Analytics</a>
+        </div>
+        <a href="/predict" class="new-prediction-btn">+ New Prediction</a>
+    </nav>
 
-    <!-- ✅ Left Panel -->
-    <div class="panel">
-
-      <h2>Prediction Result</h2>
-
-      <!-- Demand Output -->
-      <p class="output">{{ demand }} Orders</p>
-
-      <!-- Status -->
-      <p class="status"><b>Status:</b> {{ level }}</p>
-
-      <!-- Recommendation -->
-      <p class="tip">{{ tip }}</p>
-
-      <!-- ✅ Auto Price Display -->
-      <p class="price"><b>Auto Price:</b> ₹{{ price }}</p>
-
-      <!-- ✅ Menu Item Preview Card -->
-      <div class="menu-card">
-
-        <h3>Selected Menu Item</h3>
-        <p style="opacity:0.85;">{{ item }}</p>
-
-        <img 
-          src="/static/menu_images/{{ food_image }}" 
-          alt="Food Preview"
-        >
-
-      </div>
-
+    <!-- Time Period Banner -->
+    <div class="time-banner">
+        <span class="badge-daily">DAILY FORECAST</span>
+        <span class="badge-weekly">WEEKLY TREND</span>
+        <span class="badge-monthly">MONTHLY PROJECTIONS</span>
+        <span class="time-text">All metrics shown are daily projections • Weekly graph shows next 7 days</span>
     </div>
 
-    <!-- ✅ Right Panel -->
-    <div class="panel">
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- LEFT COLUMN - Graph + Monthly + Simulation (as requested) -->
+        <div class="left-column">
+            <!-- Graph Card -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <h2>Weekly Demand Trend - {{ item }}</h2>
+                    <span class="badge-weekly">7 DAYS</span>
+                </div>
+                <div class="graph-container">
+                    <img src="/static/{{ graph }}" alt="Demand Trend">
+                </div>
+                <div class="graph-note">
+                    Projected demand pattern from Mon to Sun
+                </div>
+            </div>
 
-      <h2>Weekly Trend</h2>
+            <!-- MONTHLY PROJECTIONS CARD - MOVED HERE (as requested) -->
+            <div class="monthly-card">
+                <div class="monthly-header">
+                    <h3>Monthly Projections</h3>
+                    <span class="monthly-badge">30 DAYS</span>
+                </div>
+                <p style="color: rgba(255,255,255,0.7); font-size:0.9rem; margin-bottom:1rem;">
+                    If same conditions continue for 30 days:
+                </p>
+                <div class="monthly-grid">
+                    <div class="monthly-item">
+                        <div class="monthly-value">{{ demand * 30 }}</div>
+                        <div class="monthly-label">Monthly Orders</div>
+                    </div>
+                    <div class="monthly-item">
+                        <div class="monthly-value">₹{{ revenue * 30 }}</div>
+                        <div class="monthly-label">Monthly Revenue</div>
+                    </div>
+                    <div class="monthly-item">
+                        <div class="monthly-value">₹{{ profit * 30 }}</div>
+                        <div class="monthly-label">Monthly Profit</div>
+                    </div>
+                </div>
+                <div class="monthly-note">
+                    * Projected figures based on daily average
+                </div>
+            </div>
 
-      <!-- Trend Graph -->
-      <img src="/static/{{ graph }}" class="graph">
+            <!-- SIMULATION CARD - MOVED HERE (as requested) -->
+            <div class="simulation-card">
+                <div class="simulation-header">
+                    <h3>Price & Festival Simulation</h3>
+                    <span class="simulation-badge">WHAT-IF TODAY</span>
+                </div>
+                <p style="color: rgba(255,255,255,0.7); font-size:0.9rem;">
+                    Test how changes affect TODAY'S demand and profit for {{ item }}
+                </p>
+                
+                <form action="/simulate" method="POST" class="simulation-form">
+                    <div class="form-field">
+                        <label>New Price (₹): <span style="color:rgba(255,255,255,0.4);">per item</span></label>
+                        <input type="number" name="new_price" step="1" value="{{ price }}" required>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label>Festival:</label>
+                        <select name="new_festival" required>
+                            <option value="Yes" {% if festival == "Yes" %}selected{% endif %}>Yes</option>
+                            <option value="No" {% if festival == "No" %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" name="branch" value="{{ branch }}">
+                    <input type="hidden" name="meal" value="{{ meal }}">
+                    <input type="hidden" name="item" value="{{ item }}">
+                    <input type="hidden" name="day_type" value="{{ day_type }}">
+                    
+                    <button type="submit" class="simulation-btn">Run Simulation</button>
+                </form>
+                
+                <div class="simulation-note">
+                    ⚡ Simulation updates all metrics for TODAY only. Monthly projections will recalculate automatically.
+                </div>
+            </div>
+        </div>
 
-      <h3>Scenario Simulator</h3>
+        <!-- RIGHT COLUMN - Metrics and Item Card (unchanged) -->
+        <div class="right-column">
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h3>Daily Orders</h3>
+                        <span class="metric-badge">TODAY</span>
+                    </div>
+                    <div class="metric-value">{{ demand }}</div>
+                    <div class="metric-sub">orders expected today</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h3>Daily Revenue</h3>
+                        <span class="metric-badge">TODAY</span>
+                    </div>
+                    <div class="metric-value">₹{{ revenue }}</div>
+                    <div class="metric-sub">revenue for today</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h3>Daily Profit</h3>
+                        <span class="metric-badge">TODAY</span>
+                    </div>
+                    <div class="metric-value">₹{{ profit }}</div>
+                    <div class="metric-sub">profit for today</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <h3>Profit Margin</h3>
+                        <span class="metric-badge">PER ORDER</span>
+                    </div>
+                    <div class="metric-value">{{ margin }}%</div>
+                    <div class="metric-sub">on each sale</div>
+                </div>
+            </div>
 
-      <!-- ✅ Simulator Form -->
-      <form action="/simulate" method="POST" class="sim-form">
+            <!-- Item Card -->
+            <div class="item-card">
+                <div class="item-header">
+                    <h3>{{ item }}</h3>
+                    <span class="unit-badge">PER UNIT</span>
+                </div>
+                <img src="/static/menu_images/{{ food_image }}" alt="{{ item }}" onerror="this.src='/static/menu_images/default.jpg'">
+                <div class="item-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Selling Price:</span>
+                        <span class="detail-value">₹{{ price }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Cost Price:</span>
+                        <span class="detail-value">₹{{ cost_per_unit|default(price * 0.6)|int }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Profit per item:</span>
+                        <span class="detail-value">₹{{ (price * 0.4)|int }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="status-badge 
+                                {% if level == 'Low Demand' %}status-low
+                                {% elif level == 'Moderate Demand' %}status-moderate
+                                {% else %}status-high{% endif %}">
+                                {{ level }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Tip:</span>
+                        <span class="detail-value">{{ tip }}</span>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Auto-Filled Price -->
-        <label>New Price</label>
-        <input 
-          type="number" 
-          name="new_price" 
-          value="{{ price }}" 
-          required
-        >
-
-        <label>Festival Day</label>
-        <select name="new_festival">
-          <option>No</option>
-          <option>Yes</option>
-        </select>
-
-        <!-- Hidden Inputs -->
-        <input type="hidden" name="branch" value="{{ branch }}">
-        <input type="hidden" name="meal" value="{{ meal }}">
-        <input type="hidden" name="item" value="{{ item }}">
-        <input type="hidden" name="day_type" value="{{ day_type }}">
-
-        <button type="submit">Simulate Demand</button>
-
-      </form>
-
+            <!-- Weather Note -->
+            <div class="weather-note">
+                36°C • Sunny • {{ branch }} • {{ meal }}
+            </div>
+        </div>
     </div>
-
-  </div>
-
-  <!-- ✅ Bottom Navigation Buttons -->
-  <div class="bottom-action">
-    <a href="/predict" class="btn">New Prediction</a>
-    <a href="/" class="btn">Back to Home</a>
-  </div>
+</div>
 
 </body>
 </html>
